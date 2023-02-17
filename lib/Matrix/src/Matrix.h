@@ -2,7 +2,7 @@
 #define MATRIX_H
 
 #include <Arduino.h>
-#include "Constants.h"
+#include <Constants.h>
 
 
 class Matrix{
@@ -10,7 +10,9 @@ class Matrix{
         Matrix(byte height, byte width);
         void update();
         void push_col_data(byte led_color ,byte column_number, byte data);
+        void push_row_data(byte led_color, byte row_number, byte data);
         void move_data(byte led_color, byte direction, byte* new_data, byte new_data_size);
+        void slide_row(byte led_color, byte direction, byte row);
         void reset(byte led_color);
 
     private:
@@ -23,10 +25,12 @@ class Matrix{
 
         int _light_on_time = 100; //microseconds
 
-        void set_pins( byte* pin_array, byte size_of_array, byte val); //Set the col or row pins all High or Low
+        void set_pins( const byte* pin_array, byte size_of_array, byte pin_mode, byte val = LOW); //Set the col or row pins all High or Low
 
-        byte row_pins[8] = {1, 2, 3, 4, 5, 6, 7, 8};
-        byte colPins[8] = {9, 10, 11, 12, 13, 14, 15, 16};
+        const byte row_pins[8] = {2, 3, 4, 5, 6, 7, 8, 9};
+        const byte col_pins[8] = {A3, A2, A1, A0, 13, 12, 11, 10};
+        const byte masks_off[8] = {0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b11101111, 0b11011111, 0b10111111, 0b01111111};
+        const byte masks_on[8] = {1,2,4,8,16,32,64,128};
 
 
 };
