@@ -35,7 +35,7 @@ void Matrix::push_col_data(byte led_color ,byte column_number, byte data){
 void Matrix::push_row_data(byte led_color, byte row_number, byte row_data){
     //Push a byte of data to a selected row
     byte temp_val;
-    for( byte i = 0; i < MATRIX_WIDTH; i++){
+    for( byte i = 0; i < MATRIX_WIDTH; i++){ //Cycle through all Collumns
         switch(led_color){
             case BLUE_LED:
                 temp_val = 0b00000001 & (row_data >> (MATRIX_WIDTH - i - 1)); //get the bit at the appropriate collumn of the supplied data byte
@@ -43,13 +43,19 @@ void Matrix::push_row_data(byte led_color, byte row_number, byte row_data){
                 break;
             case YELLOW_LED:
                 temp_val = 0b00000001 & (row_data >> (MATRIX_WIDTH - i - 1)); //get the bit at the appropriate collumn of the supplied data byte
+                if( temp_val == 1){
+                    yellow_col_data[i] |= masks_on[row_number];
+                }
+                else{
+                    yellow_col_data[i] &= masks_off[row_number];
+                }
                 yellow_col_data[i] |= (temp_val << row_number); //Assign the bit to the correct position in the collumn 
                 break;
         }
     }
 }
 
-void Matrix::reset( byte led_color ){
+void Matrix::reset( byte led_color = 0){
     if( led_color == BLUE_LED){
         for( byte i = 0; i < 8; i++){
             blue_col_data[i] = 0;
@@ -59,6 +65,12 @@ void Matrix::reset( byte led_color ){
         for( byte i = 0; i < 8; i++){
             yellow_col_data[i] = 0;
         }
+    }
+    else{
+        for( byte i = 0; i < 8; i++){
+            yellow_col_data[i] = 0;
+            blue_col_data[i] = 0;
+        } 
     }
 }
 
@@ -90,14 +102,14 @@ void Matrix::move_data(byte led_color, byte direction, byte* new_data, byte new_
                 //If inputting 4 collumns, move index 4 (col5) to index 0 (col1)
                 byte tmp_col = array_ptr[i]; //Get the value of the array using the pointer plus index
                 array_ptr[_cnt] = tmp_col; //Reassign the shifted collumn the temp value
-                Serial.println(array_ptr[_cnt]);
+                //Serial.println(array_ptr[_cnt]);
                 _cnt++; //increment the secondary counter
             } 
 
             _cnt = 0;
             //Push in new data to the columns to overwrite
             //If inputting 4 collumns, start at index 4 (col5) and write until index 7 (col8)
-            for( byte i = MATRIX_WIDTH - new_data_size; i < _width; i++){
+            for( byte i = MATRIX_WIDTH - new_data_size; i < MATRIX_WIDTH; i++){
                 array_ptr[i] = new_data[_cnt];
                 _cnt++;
             }  
@@ -113,12 +125,13 @@ void Matrix::move_data(byte led_color, byte direction, byte* new_data, byte new_
                 _cnt--; //increment the secondary counter
             } 
 
+            _cnt = 0;
             //Push in new data to the columns to overwrite
             //If inputting 1 collumn, start at index 7 and write only that
             //If inputting 4 collumns, start at index 4 (col5) and write until index 0 (col1)
             for( byte i = _width - new_data_size; i >= 0; i--){
-                byte _cnt = new_data_size - 1;
-                *(array_ptr + i) = new_data[_cnt];
+                _cnt = new_data_size - 1;
+                array_ptr[i] = new_data[_cnt];
                 _cnt--;
             }  
             break;
@@ -134,7 +147,8 @@ void Matrix::update(){
     //Serial.println("Updating Matrix");
     
 
-    //Scan through each collumn from left to right
+    //Scan through each collumn from left to right and do the yellow LEDs
+    set_pins(row_pins, MATRIX_HEIGHT, OUTPUT, LOW); //Change the rows to outputs and set LOW
     for( byte i = 0; i < _width; i++ ){
         if( col_active == true){
             Serial.println("Another collumn already active");
@@ -145,8 +159,6 @@ void Matrix::update(){
 
 
         //Light the Yellow LEDs
-        set_pins(row_pins, MATRIX_WIDTH, OUTPUT, LOW); //Change the rows to outputs and set LOW
-
         if( yellow_col_data[i] > 0){ //Check if there's even data in the collumn
             pinMode(col_pins[i], OUTPUT); //Change the collumn to an output and set LOW to sink current
             digitalWrite(col_pins[i], LOW);
@@ -161,30 +173,40 @@ void Matrix::update(){
             }
             pinMode(col_pins[i],INPUT);
         }
-        else{
-            Serial.println("No Data");
+
+        col_active = false;
+    }
+
+    set_pins(row_pins, MATRIX_HEIGHT, INPUT);
+
+    //Scan through each collumn from left to right and do the Blue LEDs
+    for( byte i = 0; i < _width; i++ ){
+        if( col_active == true){
+            Serial.println("Another collumn already active");
+            break;
         }
 
+        col_active = true;
 
 
-        //Light the Blue LEDs
-        /* set_pins(row_pins, MATRIX_HEIGHT, HIGH);
-        
-        digitalWrite(col_pins[i], HIGH);
+        //Light the BlueLEDs
+        //set_pins(col_pins, MATRIX_WIDTH, OUTPUT, LOW); //Change the rows to outputs and set LOW
 
         if( blue_col_data[i] > 0){ //Check if there's even data in the collumn
+            pinMode(col_pins[i], OUTPUT); //Change the collumn to an output and set HIGH to source current
+            digitalWrite(col_pins[i], HIGH);
+
             temp_val = blue_col_data[i];
-            for( byte j = 0; j< _height; j++){  //Cycle through the rows starting at the bottom which is Row 0
-                if(((blue_col_data[i] >> j) & 0b00000001) == true){
+            for( byte j = 0; j < _height; j++){  //Cycle through the rows starting at the bottom which is Row 0
+                if( ((temp_val >> j) & 0b00000001) == true){
+                    pinMode(row_pins[j], OUTPUT);
                     digitalWrite(row_pins[j], LOW);    //Briefly turn the light on 
                     delayMicroseconds(_light_on_time);
-                    digitalWrite(row_pins[j], HIGH);
+                    pinMode(row_pins[j], INPUT);
                 }
             }
-        } */
-
-        //set_pins(row_pins, MATRIX_WIDTH, INPUT);
-        //set_pins(col_pins, MATRIX_HEIGHT, INPUT);
+            pinMode(col_pins[i],INPUT);
+        }
 
         col_active = false;
         
@@ -194,6 +216,7 @@ void Matrix::update(){
 void Matrix::slide_row(byte led_color, byte direction, byte row){
     //Slide data within a row a one space either left or right
     byte* array_ptr;
+    byte temp_val;
 
     switch(led_color){
         case BLUE_LED:
@@ -207,8 +230,9 @@ void Matrix::slide_row(byte led_color, byte direction, byte row){
     switch(direction){
 
         case LEFT:
-            for( byte i = 1; i < 8; i++){ //Don't need to start at 0 since collumn 0 will be lost in a left shift
-                if(( array_ptr[i] & masks_on[row]) > 0){ //Bit is a 1
+            for( byte i = 1; i < MATRIX_WIDTH; i++){ //Don't need to start at 0 since collumn 0 will be lost in a left shift
+                temp_val = 0b00000001 & (array_ptr[i] >> row);
+                if( temp_val == 1){ //Bit is a 1
                     array_ptr[i-1] |= masks_on[row];
                 }
                 else{
@@ -219,8 +243,14 @@ void Matrix::slide_row(byte led_color, byte direction, byte row){
             break;
 
         case RIGHT:
-            for( byte i = 6; i > 0; i--){ //Don't need to start at 0 since collumn 0 will be lost in a left shift
-                if( (array_ptr[i] & masks_on[row]) > 0){ //Bit is a 1
+            for( byte i = MATRIX_WIDTH - 2; i >= 0 && i != 255; i--){ //Don't need to start at 0 since collumn 0 will be lost in a left shift
+                //Had to add an exit case for != 255 because on the last loop it does 0 - 1 which = 255, so this runs it doewn to zero and then stops the wraparound.
+                /* Serial.print("Column ");
+                Serial.print(i);
+                Serial.print(": ");
+                Serial.println(array_ptr[i], BIN); */
+                temp_val = 0b00000001 & (array_ptr[i] >> row);
+                if( temp_val == 1 ){ //Bit is a 1
                     array_ptr[i+1] |= masks_on[row];
                 }
                 else{
@@ -231,6 +261,32 @@ void Matrix::slide_row(byte led_color, byte direction, byte row){
             break;
 
     }
+}
+
+bool Matrix::banner_text(byte led_color, byte* text, byte length_of_array, bool loop = false){
+
+    static byte* prev_text = nullptr;
+
+    if( text != prev_text){ //Reset the banner text if the text passed to the function has changed pointer address
+        Serial.println("Resetting the banner");
+        reset();
+        last_update_time = 0;
+        banner_count = 0;
+        prev_text = text;
+    }
+    if( millis() - last_update_time >= banner_pan_speed){
+        if( banner_count == length_of_array - 1){ //IF at end of the banner
+            if( loop == false){
+                return false; //Return false when done looping
+            }
+            banner_count = 0; //Reset banner_count if at the end of text to loop banner again
+        }
+
+        move_data(led_color, LEFT, &text[banner_count], 1);
+        last_update_time = millis();
+        banner_count++; //Track where the banner is to start looping again if needed
+    }
+    return true;
 }
 
 

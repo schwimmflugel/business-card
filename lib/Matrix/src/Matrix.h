@@ -13,7 +13,8 @@ class Matrix{
         void push_row_data(byte led_color, byte row_number, byte data);
         void move_data(byte led_color, byte direction, byte* new_data, byte new_data_size);
         void slide_row(byte led_color, byte direction, byte row);
-        void reset(byte led_color);
+        void reset(byte led_color = 0);
+        bool banner_text(byte led_color, byte* text, byte length_of_array, bool loop = false);
 
     private:
         int _height, _width; 
@@ -21,6 +22,11 @@ class Matrix{
         byte row_count = 0;
         byte yellow_col_data[8];
         byte blue_col_data[8];
+
+        int banner_pan_speed = 200;
+        unsigned long last_update_time = 0;
+        byte banner_count = 0;
+        int* prev_text;
         
 
         int _light_on_time = 100; //microseconds

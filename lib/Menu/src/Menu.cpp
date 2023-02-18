@@ -10,28 +10,6 @@ Menu::Menu(){
     Stack stack();
 }
 
-void Menu::banner_text(Matrix* matrix, byte* text, byte length_of_array){
-    //byte* text_cast = const_cast<byte*>(text);
-
-    static byte* prev_text = nullptr;
-
-    if( text != prev_text){ //Reset the banner text if the text passed to the function has changed pointer address
-        Serial.println("Resetting the banner");
-        matrix->reset(YELLOW_LED);
-        last_update_time = 0;
-        banner_count = 0;
-        prev_text = text;
-    }
-    if( millis() - last_update_time >= pan_speed){
-        if( banner_count == length_of_array - 1){
-            banner_count = 0; //Reset banner_count if at the end of text to loop banner again
-        }
-
-        matrix->move_data(YELLOW_LED, LEFT, &text[banner_count], 1);
-        last_update_time = millis();
-        banner_count++; //Track where the banner is to start looping again if needed
-    }
-}
 
 void Menu::run(Matrix* matrix, Controls* controls){
     byte val;
@@ -51,15 +29,16 @@ void Menu::run(Matrix* matrix, Controls* controls){
 
     switch(active_screen){
         case 0:
-            banner_text(matrix, HELLO_text, sizeof(HELLO_text));
+            //banner_text(matrix, HELLO_text, sizeof(HELLO_text));
+            matrix->banner_text(BLUE_LED, HELLO_text, sizeof(HELLO_text), true);
             break;
 
         case 1:
-            banner_text(matrix, STACK_text, sizeof(STACK_text));
+            matrix->banner_text(YELLOW_LED, STACK_text, sizeof(STACK_text), true);
             break;
 
         case 2:
-            banner_text(matrix, MAZE_text, sizeof(MAZE_text));
+            matrix->banner_text(YELLOW_LED, MAZE_text, sizeof(MAZE_text), true);
             break;            
     }
 
