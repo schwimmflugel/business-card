@@ -10,7 +10,7 @@ Stack::Stack(){
 void Stack::run(Matrix* matrix, Controls* controls){
     reset();
     byte temp_val;
-    matrix->reset(YELLOW_LED); //Clear the screen
+    matrix->reset(); //Clear the screen
     byte first_row_binary = 255 << (MATRIX_WIDTH - block_width[current_height]);
     matrix->push_row_data(YELLOW_LED, current_height, first_row_binary); //Set the first row of blocks
 
@@ -110,13 +110,13 @@ void Stack::run(Matrix* matrix, Controls* controls){
 
     if(lose == true){
         matrix->reset(YELLOW_LED);
-        while(matrix->banner_text(YELLOW_LED,LOSE_text, sizeof(LOSE_text))){
+        while(matrix->banner_text(YELLOW_LED,"YOU LOSE! ")){
             matrix->update();
         }
     }
     else{
         matrix->reset(YELLOW_LED);
-        while(matrix->banner_text(BLUE_LED,WIN_text, sizeof(WIN_text))){
+        while(matrix->banner_text(BLUE_LED,"YOU WIN! ")){
             matrix->update();
         }
     }

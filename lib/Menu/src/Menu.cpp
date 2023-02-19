@@ -4,10 +4,12 @@
 #include <Matrix.h>
 #include <Controls.h>
 #include <Stack.h>
+#include <Space.h>
 
 Menu::Menu(){
     //Controls controls = Controls(A4, A5);
     Stack stack();
+    Space space();
 }
 
 
@@ -18,11 +20,14 @@ void Menu::run(Matrix* matrix, Controls* controls){
     val = controls->direction_state_change();
     if( val == RIGHT){
         active_screen++;
+        if( active_screen > 3 ){
+            active_screen = 3;
+        }
     }
     else if (val == LEFT)
     {
         active_screen--;
-        if(active_screen < 0){
+        if(active_screen == 255){
             active_screen = 0;
         }
     }
@@ -30,16 +35,21 @@ void Menu::run(Matrix* matrix, Controls* controls){
     switch(active_screen){
         case 0:
             //banner_text(matrix, HELLO_text, sizeof(HELLO_text));
-            matrix->banner_text(BLUE_LED, HELLO_text, sizeof(HELLO_text), true);
+            //matrix->banner_text(BLUE_LED, HELLO_text, sizeof(HELLO_text), true);
+            matrix->banner_text(BLUE_LED, "HELLO AVA! ", true);
             break;
 
         case 1:
-            matrix->banner_text(YELLOW_LED, STACK_text, sizeof(STACK_text), true);
+            matrix->banner_text(BLUE_LED, "STACKER  ", true);
             break;
 
         case 2:
-            matrix->banner_text(YELLOW_LED, MAZE_text, sizeof(MAZE_text), true);
-            break;            
+            matrix->banner_text(BLUE_LED, "MAZED  ", true);
+            break; 
+
+        case 3:
+            matrix->banner_text(BLUE_LED, "SPACE RUN  ", true);
+            break;  
     }
 
     val = controls->select_state_change();
@@ -50,6 +60,9 @@ void Menu::run(Matrix* matrix, Controls* controls){
                 break;
             case 2:
                 //maze.run(matrix);
+                break;
+            case 3:
+                space.run(matrix, controls);
                 break;
         }
 

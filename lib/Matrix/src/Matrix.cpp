@@ -136,6 +136,19 @@ void Matrix::move_data(byte led_color, byte direction, byte* new_data, byte new_
             }  
             break;
 
+        case DOWN:
+            //Compile a byte of data for each collumn to enter
+            for( byte i = 0; i < MATRIX_WIDTH; i++){
+                byte get_bit = (new_data[0] >> ((MATRIX_WIDTH - i) - 1)) & 0b000000001;
+                    if( get_bit == 1){
+                        array_ptr[i] <<= new_data_size; //Shift the collumn data down and out by new data size
+                        array_ptr[i] |= get_bit; //And the new bit to the collumn
+                    }
+                    else if(get_bit == 0){
+                        array_ptr[i] <<= new_data_size; //Shift the collumn data down and out by new data size, the new input is already 0
+                    }
+            }
+
     }
 }
 
@@ -263,12 +276,11 @@ void Matrix::slide_row(byte led_color, byte direction, byte row){
     }
 }
 
-bool Matrix::banner_text(byte led_color, byte* text, byte length_of_array, bool loop = false){
+/* bool Matrix::banner_text(byte led_color, byte* text, byte length_of_array, bool loop = false){
 
     static byte* prev_text = nullptr;
 
     if( text != prev_text){ //Reset the banner text if the text passed to the function has changed pointer address
-        Serial.println("Resetting the banner");
         reset();
         last_update_time = 0;
         banner_count = 0;
@@ -288,5 +300,228 @@ bool Matrix::banner_text(byte led_color, byte* text, byte length_of_array, bool 
     }
     return true;
 }
+ */
 
+bool Matrix::banner_text(byte led_color, byte* text_string, bool loop = false){
+
+    static byte* prev_text_string = nullptr;
+
+    if( text_string != prev_text_string){ //Reset the banner text if the text passed to the function has changed pointer address
+        reset();
+        last_update_time = 0;
+        char_count = 0;
+        char_byte_count = 0;
+        prev_text_string = text_string;
+    }
+
+    if( millis() - last_update_time >= banner_pan_speed){
+        
+        if(char_byte_count == get_char_size(text_string[char_count])){
+            char_count++; //move to the next character in the string if reached the end of the current char bytes
+            char_byte_count = 0;
+        }
+
+         if(text_string[char_count] == '\0'){ //null character indicating the end of the text string
+            if( loop == false){
+                return false; //Return false when done looping
+            }
+            char_count = 0;
+            char_byte_count = 0; //Reset banner_count if at the end of text to loop banner again
+        }
+
+
+        move_data(led_color, LEFT, &get_char_bytes(text_string[char_count])[char_byte_count], 1);
+        last_update_time = millis();
+        char_byte_count++; //Track which byte we are in in the current character in the text string
+    }
+    return true;
+}
+
+bool Matrix::val_at_cell(byte led_color, byte col, byte row){
+    //Function to query the value of the Yellow or Blue array at a certain point and return the value
+    switch(led_color){
+    case BLUE_LED:
+        if( (blue_col_data[col] & masks_on[row]) > 0 ){
+            return true;
+        }
+        break;
+    case YELLOW_LED:
+        if( (yellow_col_data[col] & masks_on[row]) > 0 ){
+            return true;
+        }
+        break;
+    }
+    return false;
+}
+
+byte* Matrix::get_char_bytes(char val){
+    switch (val){
+        case ' ':
+            return blank;
+        case 'A':
+            return A;
+        case 'B':
+            return B;
+        case 'C':
+            return C;
+        case 'D':
+            return D;
+        case 'E':
+            return E;
+        case 'F':
+            return F;
+        case 'G':
+            return G;
+        case 'H':
+            return H;
+        case 'I':
+            return I;
+        case 'J':
+            return J;
+        case 'K':
+            return K;
+        case 'L':
+            return L;
+        case 'M':
+            return M;
+        case 'N':
+            return N;
+        case 'O':
+            return O;
+        case 'P':
+            return P;
+        case 'Q':
+            return Q;
+        case 'R':
+            return R;
+        case 'S':
+            return S;
+        case 'T':
+            return T;
+        case 'U':
+            return U;
+        case 'V':
+            return V;
+        case 'W':
+            return W;
+        case 'X':
+            return X;
+        case 'Y':
+            return Y;
+        case 'Z':
+            return Z;
+        case '1':
+            return ONE;
+        case '2':
+            return TWO;
+        case '3':
+            return THREE;
+        case '4':
+            return FOUR;
+        case '5':
+            return FIVE;
+        case '6':
+            return SIX;
+        case '7':
+            return SEVEN;
+        case '8':
+            return EIGHT;
+        case '9':
+            return NINE;
+        case '0':
+            return ZERO;
+        case '!':
+            return EXCLAMATION;
+        case '?':
+            return QUESTION;
+        case '.':
+            return DOT;
+        
+    }
+}
+
+byte Matrix::get_char_size(char val){
+    switch(val){
+        case ' ':
+            return sizeof(blank);
+        case 'A':
+            return sizeof(A);
+        case 'B':
+            return sizeof(B);
+        case 'C':
+            return sizeof(C);
+        case 'D':
+            return sizeof(D);
+        case 'E':
+            return sizeof(E);
+        case 'F':
+            return sizeof(F);
+        case 'G':
+            return sizeof(G);
+        case 'H':
+            return sizeof(H);
+        case 'I':
+            return sizeof(I);
+        case 'J':
+            return sizeof(J);
+        case 'K':
+            return sizeof(K);
+        case 'L':
+            return sizeof(L);
+        case 'M':
+            return sizeof(M);
+        case 'N':
+            return sizeof(N);
+        case 'O':
+            return sizeof(O);
+        case 'P':
+            return sizeof(P);
+        case 'Q':
+            return sizeof(Q);
+        case 'R':
+            return sizeof(R);
+        case 'S':
+            return sizeof(S);
+        case 'T':
+            return sizeof(T);
+        case 'U':
+            return sizeof(U);
+        case 'V':
+            return sizeof(V);
+        case 'W':
+            return sizeof(W);
+        case 'X':
+            return sizeof(X);
+        case 'Y':
+            return sizeof(Y);
+        case 'Z':
+            return sizeof(Z);
+        case '1':
+            return sizeof(ONE);
+        case '2':
+            return sizeof(TWO);
+        case '3':
+            return sizeof(THREE);
+        case '4':
+            return sizeof(FOUR);
+        case '5':
+            return sizeof(FIVE);
+        case '6':
+            return sizeof(SIX);
+        case '7':
+            return sizeof(SEVEN);
+        case '8':
+            return sizeof(EIGHT);
+        case '9':
+            return sizeof(NINE);
+        case '0':
+            return sizeof(ZERO);
+        case '!':
+            return sizeof(EXCLAMATION);
+        case '?':
+            return sizeof(QUESTION);
+        case '.':
+            return sizeof(DOT);
+    }
+}
 
