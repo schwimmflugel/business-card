@@ -7,15 +7,8 @@
 #include <Controls.h>
 #include <Stack.h>
 #include <Space.h>
+#include <Snake.h>
 
-
-const char STACK_text[] = "ABC ";
-
-const char HELLO_text[] = "ABCDEF   ";
-
-const char MAZE_text[] = "ABC   ";
-
-const char SPACE_text[] = "BBBB  ";
 
 
 class Menu{
@@ -34,6 +27,7 @@ class Menu{
         //Controls controls;
         Stack stack;
         Space space;
+        Snake snake;
 
 
 

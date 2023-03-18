@@ -5,11 +5,13 @@
 #include <Controls.h>
 #include <Stack.h>
 #include <Space.h>
+#include <Snake.h>
 
 Menu::Menu(){
     //Controls controls = Controls(A4, A5);
     Stack stack();
     Space space();
+    Snake snake();
 }
 
 
@@ -20,8 +22,8 @@ void Menu::run(Matrix* matrix, Controls* controls){
     val = controls->direction_state_change();
     if( val == RIGHT){
         active_screen++;
-        if( active_screen > 3 ){
-            active_screen = 3;
+        if( active_screen > 4 ){
+            active_screen = 4;
         }
     }
     else if (val == LEFT)
@@ -34,8 +36,6 @@ void Menu::run(Matrix* matrix, Controls* controls){
 
     switch(active_screen){
         case 0:
-            //banner_text(matrix, HELLO_text, sizeof(HELLO_text));
-            //matrix->banner_text(BLUE_LED, HELLO_text, sizeof(HELLO_text), true);
             matrix->banner_text(BLUE_LED, "HELLO AVA! ", true);
             break;
 
@@ -50,6 +50,10 @@ void Menu::run(Matrix* matrix, Controls* controls){
         case 3:
             matrix->banner_text(BLUE_LED, "SPACE RUN  ", true);
             break;  
+
+        case 4:
+            matrix->banner_text(BLUE_LED, "SNAKEY  ", true);
+            break;  
     }
 
     val = controls->select_state_change();
@@ -63,6 +67,9 @@ void Menu::run(Matrix* matrix, Controls* controls){
                 break;
             case 3:
                 space.run(matrix, controls);
+                break;
+            case 4:
+                snake.run(matrix, controls);
                 break;
         }
 

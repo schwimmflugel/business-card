@@ -16,6 +16,7 @@ class Matrix{
         void reset(byte led_color = 0);
         bool banner_text(byte led_color, byte* text, bool loop = false);
         bool val_at_cell(byte led_color, byte col, byte row);
+        void modify_cell(byte led_color, byte col, byte row, bool val);
 
     private:
         int _height, _width; 

@@ -276,31 +276,6 @@ void Matrix::slide_row(byte led_color, byte direction, byte row){
     }
 }
 
-/* bool Matrix::banner_text(byte led_color, byte* text, byte length_of_array, bool loop = false){
-
-    static byte* prev_text = nullptr;
-
-    if( text != prev_text){ //Reset the banner text if the text passed to the function has changed pointer address
-        reset();
-        last_update_time = 0;
-        banner_count = 0;
-        prev_text = text;
-    }
-    if( millis() - last_update_time >= banner_pan_speed){
-        if( banner_count == length_of_array - 1){ //IF at end of the banner
-            if( loop == false){
-                return false; //Return false when done looping
-            }
-            banner_count = 0; //Reset banner_count if at the end of text to loop banner again
-        }
-
-        move_data(led_color, LEFT, &text[banner_count], 1);
-        last_update_time = millis();
-        banner_count++; //Track where the banner is to start looping again if needed
-    }
-    return true;
-}
- */
 
 bool Matrix::banner_text(byte led_color, byte* text_string, bool loop = false){
 
@@ -352,6 +327,30 @@ bool Matrix::val_at_cell(byte led_color, byte col, byte row){
         break;
     }
     return false;
+}
+
+void Matrix::modify_cell(byte led_color, byte col, byte row, bool val){
+    /*Function to modify the value of a specific cell in the light matrix*/    
+    switch(led_color){
+        case BLUE_LED:
+            if( val == true){ //set position to on
+                blue_col_data[col] = blue_col_data[col] | masks_on[row];
+            }
+            else{ //set the position to off
+                blue_col_data[col] = blue_col_data[col] & masks_off[row];
+            }
+            break;
+
+        case YELLOW_LED:
+            if( val == true){ //set position to on
+                yellow_col_data[col] = yellow_col_data[col] | masks_on[row];
+            }
+            else{ //set the position to off
+                yellow_col_data[col] = yellow_col_data[col] & masks_off[row];
+            }
+            break;
+
+    }
 }
 
 byte* Matrix::get_char_bytes(char val){

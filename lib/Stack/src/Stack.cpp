@@ -91,7 +91,7 @@ void Stack::run(Matrix* matrix, Controls* controls){
                 
                 //In this case, the block must be completely outside the lower block so lose and exit
                 else{
-                    Serial.println("OCompletely out");
+                    Serial.println("Completely out");
                     lose = true;
                     break;
                     }
@@ -105,6 +105,12 @@ void Stack::run(Matrix* matrix, Controls* controls){
             }
         }
 
+        matrix->update();
+    }
+
+    //Hold the last screen for a little to see the end move before the result text is displayed
+    unsigned long game_end_time = millis();
+    while(millis() - game_end_time <= 500){
         matrix->update();
     }
 
