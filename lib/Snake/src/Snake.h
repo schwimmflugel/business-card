@@ -15,8 +15,8 @@ class Snake{
         void reset();
         bool move_snake(Matrix* matrix);
         void generate_fruit(Matrix* matrix);
-        byte snake_head_row = 3;
-        byte snake_head_col = 4;
+        byte snake_head_row;
+        byte snake_head_col;
         byte snake_pieces_row[50];
         byte snake_pieces_col[50];
         byte snake_length = 1;
