@@ -17,8 +17,8 @@ class Snake{
         void generate_fruit(Matrix* matrix);
         byte snake_head_row;
         byte snake_head_col;
-        byte snake_pieces_row[50];
-        byte snake_pieces_col[50];
+        byte snake_pieces_row[64];
+        byte snake_pieces_col[64];
         byte snake_length = 1;
 
         byte snake_direction = LEFT;

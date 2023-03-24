@@ -90,7 +90,7 @@ bool Snake::move_snake(Matrix* matrix){
         break;
     }
 
-    //Check if snake hits itself
+    //Check if snake hits itself but not the tail since that will move out of the way as the head moves forward
     if(matrix->val_at_cell(YELLOW_LED, snake_head_col, snake_head_row) == 1){
         lose = true;
         return false;
@@ -102,8 +102,10 @@ bool Snake::move_snake(Matrix* matrix){
         matrix->modify_cell(BLUE_LED, fruit_col, fruit_row, 0);
     }
 
+
+    
     //Move Snake head
-    matrix->modify_cell(YELLOW_LED,snake_head_col,snake_head_row,1);
+    matrix->modify_cell(YELLOW_LED,snake_head_col,snake_head_row,1);    
     byte tail_row = snake_pieces_row[snake_length-1];
     byte tail_col = snake_pieces_col[snake_length-1];
 
@@ -140,6 +142,7 @@ bool Snake::move_snake(Matrix* matrix){
 
     snake_pieces_col[0] = snake_head_col;
     snake_pieces_row[0] = snake_head_row;   
+
 }
 
 void Snake::generate_fruit(Matrix* matrix){
