@@ -14,6 +14,7 @@ Menu menu;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(57600);
+  randomSeed(analogRead(A0));
 }
 
 void loop() {

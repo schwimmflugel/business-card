@@ -39,8 +39,8 @@ class Matrix{
 
         const byte row_pins[8] = {2, 3, 4, 5, 6, 7, 8, 9};
         const byte col_pins[8] = {A3, A2, A1, A0, 13, 12, 11, 10};
-        const byte masks_off[8] = {0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b11101111, 0b11011111, 0b10111111, 0b01111111};
-        const byte masks_on[8] = {1,2,4,8,16,32,64,128};
+        //const byte masks_off[8] = {0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b11101111, 0b11011111, 0b10111111, 0b01111111};
+        //const byte masks_on[8] = {1,2,4,8,16,32,64,128};
 
         byte* Matrix::get_char_bytes(char val);
         byte Matrix::get_char_size(char val);

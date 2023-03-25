@@ -165,6 +165,8 @@ const byte ZERO[] = {
 0x00, 0x3e, 0x22, 0x3e
 };
 
+const byte masks_off[8] = {0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b11101111, 0b11011111, 0b10111111, 0b01111111};
+const byte masks_on[8] = {1,2,4,8,16,32,64,128};
 
 //MODE
 #define STACK 1
