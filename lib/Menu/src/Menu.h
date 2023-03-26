@@ -8,6 +8,7 @@
 #include <Stack.h>
 #include <Space.h>
 #include <Snake.h>
+#include <Maze.h>
 
 
 
@@ -28,6 +29,7 @@ class Menu{
         Stack stack;
         Space space;
         Snake snake;
+        Maze maze;
 
 
 

@@ -6,12 +6,14 @@
 #include <Stack.h>
 #include <Space.h>
 #include <Snake.h>
+#include <Maze.h>
 
 Menu::Menu(){
     //Controls controls = Controls(A4, A5);
     Stack stack();
     Space space();
     Snake snake();
+    Maze maze();
 }
 
 
@@ -63,7 +65,7 @@ void Menu::run(Matrix* matrix, Controls* controls){
                 stack.run(matrix, controls);
                 break;
             case 2:
-                //maze.run(matrix);
+                maze.run(matrix, controls);
                 break;
             case 3:
                 space.run(matrix, controls);

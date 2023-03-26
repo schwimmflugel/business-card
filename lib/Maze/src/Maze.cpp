@@ -6,12 +6,40 @@
 
 Maze::Maze(){}
 
+void Maze::run(Matrix* matrix, Controls* controls){
+    reset();
+
+    matrix->reset();
+
+    generate_maze();
+    matrix->modify_cell(BLUE_LED, (player_col % 8), (player_row % 8), 1);
+    update_maze(matrix);
+
+    while( true ){
+        byte button_val = controls->direction_state_change();
+        if( button_val == UP || button_val == DOWN || button_val == LEFT || button_val == RIGHT){
+            move_player(matrix, button_val);
+        }
+
+        matrix->update();
+
+        //end game if player position readhes the ed position
+        if( player_col == largest_col && player_row == largest_row ){
+            break;
+        }
+    }
+
+    matrix->reset();
+
+
+}
+
 void Maze::generate_maze(){
     //Set all bits in the maze array to high
     for(int i = 0; i < sizeof(collumn); i++){
-        collumn[i] = 1;
+        collumn[i] = 255;
     }
-
+    
     byte start_pos = random(1, (8*num_grids) - 1 );//Pick a random place to begin maze
     
     collumn[start_pos] = 0b11111110;
@@ -22,8 +50,9 @@ void Maze::generate_maze(){
     stack_length++;
 
     while( stack_length > 0 ){
-        byte current_row = stack_row[largest_length-1];
-        byte current_col = stack_col[largest_length-1];
+        //pull the most recent block from the stack
+        byte current_row = stack_row[stack_length-1];
+        byte current_col = stack_col[stack_length-1];
 
         byte neighbors[] = {UP, DOWN, LEFT, RIGHT};
         // Shuffle the neighbor array with isher-Yates shuffle 
@@ -34,50 +63,57 @@ void Maze::generate_maze(){
             neighbors[j] = temp;
         }
 
-        int next_row, next_col;
-        //cycle through the neighbors
+        byte next_row, next_col;
+        //cycle through the neighbors to find the first valid space
         for( byte i = 0; i < 4; i++){
+            bool pass_for_loop = false;
             switch( neighbors[i] ){
                 case UP:
-                    if( current_row == 1){
-                        continue; //skip the UP if the row is the 2nd one from the top which can't go up
+                    if( current_row <= 1){
+                        pass_for_loop = true;
+                        break; //skip the UP if the row is the 2nd one from the top which can't go up
                     }
                     next_row = current_row - 1;
                     next_col = current_col;
                     break;
 
                 case DOWN:
-                    if( current_row == ((8 * num_grids) - 2 )){
-                        continue; //skip the Down if the row is the 2nd to last one which can't go down in to the wall
+                    if( current_row >= ((8 * num_grids) - 2 )){
+                        pass_for_loop = true;
+                        break; //skip the Down if the row is the 2nd to last one which can't go down in to the wall
                     }
                     next_row = current_row + 1;
                     next_col = current_col;
                     break;
 
                 case LEFT:
-                    if( current_col == 1){
-                        continue; //skip the LEFT if the col is the 2nd from left one which can't go up
+                    if( current_col <= 1){
+                        pass_for_loop = true;
+                        break; //skip the LEFT if the col is the 2nd from left one which can't go up
                     }
                     next_row = current_row;
                     next_col = current_col - 1;
                     break;
 
                 case RIGHT:
-                    if( current_col == ((8 * num_grids) - 2 )){
-                        continue; //skip the RIGHT if the col is the 2nd to last COL
+                    if( current_col >= ((8 * num_grids) - 2 )){
+                        pass_for_loop = true;
+                        break; //skip the RIGHT if the col is the 2nd to last COL
                     }
                     next_row = current_row;
                     next_col = current_col + 1;
                     break;
             }
 
-            if( valid_space(next_row, next_col) == true && val_at_grid_space(next_row,next_col) == 1){
+            if( pass_for_loop == true){
+                continue;
+            }
+
+            if( valid_space(next_row, next_col) == true ){
                 modify_grid_space(next_row, next_col, 0);
                 stack_length++;
                 stack_col[stack_length-1] = next_col;
                 stack_row[stack_length-1] = next_row;
-
-                modify_grid_space(next_row, next_col, 0);
 
                 if(stack_length > largest_length){
                     largest_length = stack_length;
@@ -86,14 +122,19 @@ void Maze::generate_maze(){
                 }
                 break;
             }
-            //Remove the last index in the stack if no valid space
-            else if( i == 3){
-                stack_col[stack_length-1] = 0;
-                stack_row[stack_length-1] = 0;
+           
+            //Remove the last index in the stack if last loop iteration and no space valid
+            if( i == 3){
+                //stack_col[stack_length-1] = 0;
+                //stack_row[stack_length-1] = 0;
                 stack_length--;
+                break;
             }
         }
     }
+
+    end_position_index = (largest_col / 8) + (4 * (largest_row / 8));
+    
 }
 
 
@@ -103,8 +144,13 @@ bool Maze::valid_space(byte _row, byte _col){
     byte neighbors[] = {UP, DOWN, LEFT, RIGHT};
     // Shuffle the neighbor array with Fisher-Yates shuffle 
 
-    byte prev_row = stack_row[largest_length];
-    byte prev_col = stack_col[largest_length];
+    byte prev_row = stack_row[stack_length - 1];
+    byte prev_col = stack_col[stack_length - 1];
+
+    //return false if the grid space is already taken
+    if( val_at_grid_space(_row, _col) == 0){
+        return false;
+    }
 
     //Return false for any wall spaces
     if( _row == 0 || _row == ((8*num_grids)-1) || _col == 0 || _col == ((8*num_grids)-1)){
@@ -114,18 +160,21 @@ bool Maze::valid_space(byte _row, byte _col){
     byte neighbor_row, neighbor_col;
     //cycle through the neighbors
     for( byte i = 0; i < 4; i++){
+        bool pass_for_loop = false;
         switch( neighbors[i] ){
             case UP:
                 if( _row == 1){
-                    continue; //skip the UP if the row is the 2nd one from the top which can't go up
+                    pass_for_loop = true;
+                    break; //skip the UP if the row is the 2nd one from the top which can't go up
                 }
                 neighbor_row = _row - 1;
                 neighbor_col = _col;
                 break;
-
+ 
             case DOWN:
                 if( _row == ((8 * num_grids) - 2 )){
-                    continue; //skip the Down if the row is the 2nd to last one which can't go down in to the wall
+                    pass_for_loop = true;
+                    break; //skip the Down if the row is the 2nd to last one which can't go down in to the wall
                 }
                 neighbor_row = _row + 1;
                 neighbor_col = _col;
@@ -133,7 +182,8 @@ bool Maze::valid_space(byte _row, byte _col){
 
             case LEFT:
                 if( _col == 1){
-                    continue; //skip the LEFT if the col is the 2nd from left one which can't go up
+                    pass_for_loop = true;
+                    break; //skip the LEFT if the col is the 2nd from left one which can't go up
                 }
                 neighbor_row = _row;
                 neighbor_col = _col - 1;
@@ -141,11 +191,16 @@ bool Maze::valid_space(byte _row, byte _col){
 
             case RIGHT:
                 if( _col == ((8 * num_grids) - 2 )){
-                    continue; //skip the RIGHT if the col is the 2nd to last COL
+                    pass_for_loop = true;
+                    break; //skip the RIGHT if the col is the 2nd to last COL
                 }                
                 neighbor_row = _row;
                 neighbor_col = _col + 1;
                 break;
+        }
+
+        if( pass_for_loop == true){
+            continue;
         }
 
         //Ignore the neighbor call that is the previously taken spot
@@ -213,12 +268,23 @@ void Maze::update_maze(Matrix* matrix){
     8 9 ...
     */
     byte index = (player_col / 8) + (4 * (player_row / 8));
+    if(index == prev_player_index){
+        return; //Skip pushing new data if the player is still in the same quadrant
+    }
 
     for( byte i = 0; i < 8; i++){
         matrix->push_col_data(YELLOW_LED,i,collumn[(index*8)+i]);
     }
 
-    matrix->modify_cell(BLUE_LED, (player_col % 8), (player_row % 8), 1);
+    //display the end space if in the same index as player
+    if( end_position_index == index){
+        matrix->modify_cell(BLUE_LED, (largest_col % 8), (largest_row % 8), 1);
+
+    }
+
+
+
+    //matrix->modify_cell(BLUE_LED, (player_col % 8), (player_row % 8), 1);
 }
 
 void Maze::move_player(Matrix* matrix,byte direction){
@@ -260,7 +326,7 @@ void Maze::move_player(Matrix* matrix,byte direction){
             break;
     }
 
-    matrix->modify_cell(BLUE_LED, (player_col % 8), (player_row % 8), 0);
+    //matrix->modify_cell(BLUE_LED, (player_col % 8), (player_row % 8), 0);
 
     switch (direction){
     case UP:
@@ -273,12 +339,25 @@ void Maze::move_player(Matrix* matrix,byte direction){
         player_col--;
         break;
     case RIGHT:
-        player_row++;
+        player_col++;
         break;
 
     }
+    matrix->reset(BLUE_LED); //Remove old player position and end spot
 
     matrix->modify_cell(BLUE_LED, (player_col % 8), (player_row % 8), 1);
+    update_maze(matrix); //Update the maze for the new player position
 
+}
+
+void Maze::reset(){
+        for(int i = 0; i < 128; i++){
+            stack_row[i] = 0;
+            stack_col[i] = 0;
+        }
+        largest_length = 0;
+        stack_length = 0;
+        
+        bool end = false;
 }
 

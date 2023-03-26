@@ -27,9 +27,11 @@ class Maze{
         byte largest_length;
         byte stack_length;
         byte largest_row, largest_col;
+        byte end_position_index = 255;
         byte player_row, player_col;
+        byte prev_player_index = 255;
         
-        bool lose = false;
+        bool end = false;
 
 };
 
