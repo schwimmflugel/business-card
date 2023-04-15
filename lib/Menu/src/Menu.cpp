@@ -38,7 +38,8 @@ void Menu::run(Matrix* matrix, Controls* controls){
 
     switch(active_screen){
         case 0:
-            matrix->banner_text(BLUE_LED, "HELLO AVA! ", true);
+            //matrix->banner_text(BLUE_LED, "HELLO AVA! ", true);
+            matrix->display_static_char(BLUE_LED, 'A');
             break;
 
         case 1:

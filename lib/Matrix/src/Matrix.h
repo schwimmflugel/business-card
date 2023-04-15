@@ -9,12 +9,13 @@ class Matrix{
     public:
         Matrix(byte height, byte width);
         void update();
-        void push_col_data(byte led_color ,byte column_number, byte data);
+        void push_col_data(byte led_color ,byte column_number, byte* data, byte data_count = 1);
         void push_row_data(byte led_color, byte row_number, byte data);
         void move_data(byte led_color, byte direction, byte* new_data, byte new_data_size);
         void slide_row(byte led_color, byte direction, byte row);
         void reset(byte led_color = 0);
         bool banner_text(byte led_color, byte* text, bool loop = false);
+        void display_static_char(byte led_color, char val);
         bool val_at_cell(byte led_color, byte col, byte row);
         void modify_cell(byte led_color, byte col, byte row, bool val);
 
@@ -44,6 +45,7 @@ class Matrix{
 
         byte* Matrix::get_char_bytes(char val);
         byte Matrix::get_char_size(char val);
+
 
 
 };

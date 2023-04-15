@@ -10,10 +10,12 @@ Space::Space(){
 void Space::run(Matrix* matrix, Controls* controls){
     reset();
     byte temp_val;
+    byte energy_disp[1];
     int step_count = 0;
     matrix->reset(); //Clear the screen
     matrix->push_row_data(BLUE_LED, 7, player_start_position);
-    matrix->push_col_data(BLUE_LED, 0, 255 >> (8 - energy));
+    energy_disp[0] = (255 >> (8 - energy));
+    matrix->push_col_data(BLUE_LED, 0, energy_disp);
   
     while( true || lose == false){
         if( matrix->val_at_cell(YELLOW_LED, player_postion, 7) == true ){ //Check if there is an asteroid in the player posititon
@@ -42,7 +44,8 @@ void Space::run(Matrix* matrix, Controls* controls){
                 step_count = 0;
                 if( energy < default_energy){
                     energy++;
-                    matrix->push_col_data(BLUE_LED, 0, 255 << (8 - energy));
+                    energy_disp[0] = 255 << (8 - energy);
+                    matrix->push_col_data(BLUE_LED, 0, energy_disp);
                 }
             }
 
@@ -58,7 +61,8 @@ void Space::run(Matrix* matrix, Controls* controls){
                 if(matrix->val_at_cell(YELLOW_LED, player_postion, i) == 1){
                     matrix->modify_cell(YELLOW_LED, player_postion, i, 0);
                     energy--;
-                    matrix->push_col_data(BLUE_LED, 0, 255 << (8 - energy));
+                    energy_disp[0] = 255 << (8 - energy);
+                    matrix->push_col_data(BLUE_LED, 0, energy_disp);
                     step_count - 3;
                     break;
                 } 

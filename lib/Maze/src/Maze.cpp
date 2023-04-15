@@ -11,6 +11,10 @@ void Maze::run(Matrix* matrix, Controls* controls){
 
     matrix->reset();
 
+    difficulty_select(matrix, controls);
+
+    matrix->reset();
+
     generate_maze();
     matrix->modify_cell(BLUE_LED, (player_col % 8), (player_row % 8), 1);
     update_maze(matrix);
@@ -273,7 +277,7 @@ void Maze::update_maze(Matrix* matrix){
     }
 
     for( byte i = 0; i < 8; i++){
-        matrix->push_col_data(YELLOW_LED,i,collumn[(index*8)+i]);
+        matrix->push_col_data(YELLOW_LED,i,&collumn[(index*8)+i]);
     }
 
     //display the end space if in the same index as player
@@ -359,5 +363,29 @@ void Maze::reset(){
         stack_length = 0;
         
         bool end = false;
+}
+
+void Maze::difficulty_select(Matrix* matrix, Controls* controls){
+    while(matrix->banner_text(BLUE_LED, "SELECT DIFFICULTY  ") && controls->select_state_change() != A_BUTTON){
+        matrix->update();
+    }
+    while(controls->select_state_change() != A_BUTTON){
+        byte dir = controls->direction_state_change();
+        switch(dir){
+            case UP:
+                if(num_grids < max_difficulty){
+                    num_grids++;
+                }
+                break;
+            case DOWN:
+                if(num_grids > 1){
+                    num_grids--;
+                }
+            break;
+        }
+        char ascii_char = num_grids + '0';
+        matrix->display_static_char(BLUE_LED ,ascii_char);
+        matrix->update();
+    }
 }
 

@@ -23,12 +23,20 @@ void Matrix::set_pins( const byte* pin_array, byte size_of_array, byte pin_mode,
     }
 }
 
-void Matrix::push_col_data(byte led_color ,byte column_number, byte data){
-    if( led_color == BLUE_LED){
-        blue_col_data[column_number] = data;
+void Matrix::push_col_data(byte led_color ,byte column_number, byte* data, byte data_count){
+    byte* array_ptr;
+
+    switch(led_color){
+        case BLUE_LED:
+            array_ptr = blue_col_data;
+            break;
+        case YELLOW_LED:
+            array_ptr = yellow_col_data;
+            break;
     }
-    else if (led_color == YELLOW_LED){
-        yellow_col_data[column_number] = data;
+    
+    for(byte i = 0; i < data_count; i++){
+        array_ptr[column_number+i] = data[i];
     }
 }
 
@@ -310,6 +318,36 @@ bool Matrix::banner_text(byte led_color, byte* text_string, bool loop = false){
         char_byte_count++; //Track which byte we are in in the current character in the text string
     }
     return true;
+}
+
+void Matrix::display_static_char(byte led_color, char val){
+    byte* array_ptr;
+
+    static char prev_val = '\0';
+    
+    if( val == prev_val){
+        return;
+    }
+
+    prev_val = val; 
+
+    switch(led_color){
+        case BLUE_LED:
+            array_ptr = blue_col_data;
+            break;
+        case YELLOW_LED:
+            array_ptr = yellow_col_data;
+            break;
+    }
+
+    reset();
+
+    byte val_size = get_char_size(val);
+
+    byte start_col = (8 - val_size)/2;
+
+    push_col_data(led_color, start_col, get_char_bytes(val), val_size);
+
 }
 
 bool Matrix::val_at_cell(byte led_color, byte col, byte row){
