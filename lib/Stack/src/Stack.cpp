@@ -43,7 +43,7 @@ void Stack::run(Matrix* matrix, Controls* controls){
         byte button_val = controls->select_state_change();
 
         if( button_val == A_BUTTON ){
-            Serial.println(current_height);
+            //Serial.println(current_height);
             if(current_height < 7){ //Don't check for overhanging blocks on the first row
                 byte current_right_position = left_block_position[current_height] + block_width[current_height] - 1;
                 byte prev_right_position = left_block_position[current_height + 1] + block_width[current_height + 1] - 1;

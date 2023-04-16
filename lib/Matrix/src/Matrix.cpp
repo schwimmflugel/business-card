@@ -33,6 +33,10 @@ void Matrix::push_col_data(byte led_color ,byte column_number, byte* data, byte 
         case YELLOW_LED:
             array_ptr = yellow_col_data;
             break;
+        case WHITE_LED: //If white, recurzively call the function on both blue and yellow, and then exit
+            push_col_data(YELLOW_LED, column_number, data, data_count);
+            push_col_data(BLUE_LED, column_number, data, data_count);
+            return;
     }
     
     for(byte i = 0; i < data_count; i++){
@@ -40,6 +44,8 @@ void Matrix::push_col_data(byte led_color ,byte column_number, byte* data, byte 
     }
 }
 
+
+//Needs updating for BLUE LED
 void Matrix::push_row_data(byte led_color, byte row_number, byte row_data){
     //Push a byte of data to a selected row
     byte temp_val;
@@ -98,6 +104,10 @@ void Matrix::move_data(byte led_color, byte direction, byte* new_data, byte new_
         case YELLOW_LED:
             array_ptr = yellow_col_data;
             break;
+        case WHITE_LED: //If white, recurzively call the function on both blue and yellow, and then exit
+            move_data(YELLOW_LED, direction, new_data, new_data_size);
+            move_data(BLUE_LED, direction, new_data, new_data_size);  
+            return;
     }
 
 
@@ -188,7 +198,8 @@ void Matrix::update(){
             for( byte j = 0; j < _height; j++){  //Cycle through the rows starting at the bottom which is Row 0
                 if( ((temp_val >> j) & 0b00000001) == true){
                     digitalWrite(row_pins[j], HIGH);    //Briefly turn the light on 
-                    delayMicroseconds(_light_on_time);
+                    //delayMicroseconds(_light_on_time);
+                    delayMicroseconds(200);
                     digitalWrite(row_pins[j], LOW);
                 }
             }
@@ -246,6 +257,11 @@ void Matrix::slide_row(byte led_color, byte direction, byte row){
         case YELLOW_LED:
             array_ptr = yellow_col_data;
             break;
+        case WHITE_LED:
+            slide_row(YELLOW_LED, direction, row);
+            slide_row(BLUE_LED, direction, row);
+            return;
+
     }
 
     switch(direction){
@@ -323,13 +339,13 @@ bool Matrix::banner_text(byte led_color, byte* text_string, bool loop = false){
 void Matrix::display_static_char(byte led_color, char val){
     byte* array_ptr;
 
-    static char prev_val = '\0';
+    /* static char prev_val = '\0';
     
     if( val == prev_val){
         return;
     }
 
-    prev_val = val; 
+    prev_val = val;  */
 
     switch(led_color){
         case BLUE_LED:
@@ -338,9 +354,13 @@ void Matrix::display_static_char(byte led_color, char val){
         case YELLOW_LED:
             array_ptr = yellow_col_data;
             break;
-    }
+        case WHITE_LED:
+            display_static_char(YELLOW_LED, val);
+            display_static_char(BLUE_LED, val);
+            return;
 
-    reset();
+        
+    }
 
     byte val_size = get_char_size(val);
 
@@ -387,11 +407,40 @@ void Matrix::modify_cell(byte led_color, byte col, byte row, bool val){
                 yellow_col_data[col] = yellow_col_data[col] & masks_off[row];
             }
             break;
+        
+        case WHITE_LED:
+            modify_cell(YELLOW_LED, col, row, val);
+            modify_cell(BLUE_LED, col, row, val);
+            return;
 
     }
 }
 
+void Matrix::display_score( byte led_color, char* preface, int value){
+    reset();
+    
+    char score[3];
+    sprintf(score, "%d", value); 
+
+    char text_to_print[20];
+
+    strcpy(text_to_print, preface); // copy the first string to the result array
+    strcat(text_to_print, score); // concatenate the second string onto the result array
+    strcat(text_to_print, "  "); // concatenate the second string onto the result array
+    //Serial.println(text_to_print);
+
+    while(banner_text(YELLOW_LED, text_to_print)){
+        update();
+    }
+}
+
 byte* Matrix::get_char_bytes(char val){
+    
+    //Convert letters to uppercase if needed
+    if(isalpha(val)){
+        val = toupper(val);
+    }
+
     switch (val){
         case ' ':
             return blank;
@@ -473,11 +522,23 @@ byte* Matrix::get_char_bytes(char val){
             return QUESTION;
         case '.':
             return DOT;
+        case ':':
+            return COLON;
+        case '-':
+            return DASH;
+        default:
+            return blank;
         
     }
 }
 
 byte Matrix::get_char_size(char val){
+
+    //Convert letters to uppercase if needed
+    if(isalpha(val)){
+        val = toupper(val);
+    }
+
     switch(val){
         case ' ':
             return sizeof(blank);
@@ -559,6 +620,12 @@ byte Matrix::get_char_size(char val){
             return sizeof(QUESTION);
         case '.':
             return sizeof(DOT);
+        case ':':
+            return sizeof(COLON);
+        case '-':
+            return sizeof(DASH);
+        default:
+            return sizeof(blank);
     }
 }
 

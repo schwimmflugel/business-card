@@ -18,6 +18,7 @@ class Matrix{
         void display_static_char(byte led_color, char val);
         bool val_at_cell(byte led_color, byte col, byte row);
         void modify_cell(byte led_color, byte col, byte row, bool val);
+        void display_score( byte led_color, char* preface, int value);
 
     private:
         int _height, _width; 

@@ -66,6 +66,7 @@ byte Controls::select_state_change(){
     byte val =  read_select();
     if( val != _prev_select){
         _prev_select = val;
+        Serial.println(val);
         return val; //Return the direction value only if its different
     }
     

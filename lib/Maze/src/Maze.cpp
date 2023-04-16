@@ -369,17 +369,21 @@ void Maze::difficulty_select(Matrix* matrix, Controls* controls){
     while(matrix->banner_text(BLUE_LED, "SELECT DIFFICULTY  ") && controls->select_state_change() != A_BUTTON){
         matrix->update();
     }
+    matrix->reset();
     while(controls->select_state_change() != A_BUTTON){
         byte dir = controls->direction_state_change();
         switch(dir){
             case UP:
                 if(num_grids < max_difficulty){
                     num_grids++;
+                    matrix->reset();
                 }
                 break;
             case DOWN:
                 if(num_grids > 1){
                     num_grids--;
+                    matrix->reset();
+
                 }
             break;
         }

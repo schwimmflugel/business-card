@@ -34,18 +34,8 @@ void Snake::run(Matrix* matrix, Controls* controls){
         matrix->update();
     }
 
-    if(lose == true){
-        matrix->reset();
-        while(matrix->banner_text(YELLOW_LED,"YOU LOSE! ")){
-            matrix->update();
-        }
-    }
-    else{
-        matrix->reset();
-        while(matrix->banner_text(BLUE_LED,"YOU WIN! ")){
-            matrix->update();
-        }
-    }
+    matrix->display_score(YELLOW_LED, "Score:", snake_length);
+
 }
 
 bool Snake::move_snake(Matrix* matrix){

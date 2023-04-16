@@ -22,7 +22,7 @@ class Snake{
         byte snake_length = 1;
 
         byte snake_direction = LEFT;
-        const unsigned int snake_speed = 300;
+        const unsigned int snake_speed = 500;
         unsigned long last_move_time = 0;
         bool lose = false;
         bool hit_fruit = false;

@@ -15,6 +15,13 @@ const byte DOT[] = {
 0x00, 0x20
 };
 
+const byte COLON[] = {
+0x00, 0x14
+};
+
+const byte DASH[] = {
+0x00, 0x08, 0x08, 0x08
+};
 
 const byte blank[] = {
 0x00, 0x00, 0x00
@@ -176,6 +183,7 @@ const byte masks_on[8] = {1,2,4,8,16,32,64,128};
 
 #define YELLOW_LED 1
 #define BLUE_LED 2
+#define WHITE_LED 3
 #define UP 3
 #define DOWN 4
 #define LEFT 5
